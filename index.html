@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IPPB DeployTrack — CUG &amp; PROD Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+
+<!-- ══════════════ AUTH ══════════════ -->
+<div id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="brand">
+        <div class="brand-icon">🏦</div>
+        <div class="brand-text">
+          <h1><span>IPPB</span> DeployTrack</h1>
+          <p>INDIA POST PAYMENTS BANK · DEPLOYMENT TRACKER</p>
+        </div>
+      </div>
+      <div class="auth-divider"></div>
+
+      <p class="signin-label">Sign in with your <strong>credentials provided by Admin</strong></p>
+
+      <!-- ROLE SELECTOR -->
+      <div class="login-role">
+        <label>SELECT YOUR ROLE</label>
+        <div class="role-cards">
+          <div class="role-card sel-admin" id="rc-admin" onclick="selectRole('admin')">
+            <span class="rc-icon">🛡️</span>
+            <span class="rc-name">Admin</span>
+            <span class="rc-desc">Full access — Add · Edit · Delete</span>
+          </div>
+          <div class="role-card" id="rc-vendor" onclick="selectRole('vendor')">
+            <span class="rc-icon">🏢</span>
+            <span class="rc-name">Vendor</span>
+            <span class="rc-desc">Add new entries only</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="auth-error" class="auth-error"></div>
+
+      <div class="field">
+        <label>EMAIL ADDRESS</label>
+        <input type="email" id="l-email" placeholder="you@company.com"/>
+      </div>
+      <div class="field" style="margin-bottom:22px">
+        <label>PASSWORD</label>
+        <input type="password" id="l-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+
+      <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign In →</button>
+
+      <p class="auth-note">
+        Don't have access? <span>Contact your Admin</span> to get credentials.<br/>
+        Accounts are managed on the backend — no self sign-up.
+      </p>
+      <div class="ippb-footer">
+        <strong>INDIA POST PAYMENTS BANK</strong><br/>
+        Har Dwar, Har Baar — आपका बैंक, आपके द्वार
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app">
+  <header class="header">
+    <div class="hdr-logo">
+      <div class="live-dot"></div>
+      <span><em>IPPB</em> DeployTrack</span>
+    </div>
+    <div class="hdr-right">
+      <div class="user-chip">
+        <span class="uname" id="hdr-name">User</span>
+        <span class="role-pill admin" id="hdr-role">ADMIN</span>
+      </div>
+      <!-- THEME TOGGLE -->
+      <div class="theme-toggle" onclick="toggleTheme()" title="Switch theme">
+        <span class="t-label" id="t-label">🌙</span>
+        <div class="toggle-track" id="toggle-track">
+          <div class="toggle-thumb"></div>
+        </div>
+        <span class="t-label" id="t-label2">☀️</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="demo-banner" id="demo-banner">
+      ⚡ <strong>Demo Mode</strong> — Firebase not configured. Data resets on refresh. &nbsp;
+      <a onclick="showFBHelp()">How to connect Firebase →</a>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card s-total"><div class="stat-label">TOTAL</div><div class="stat-value" id="st-total">0</div></div>
+      <div class="stat-card s-dep"><div class="stat-label">DEPLOYED</div><div class="stat-value" id="st-dep">0</div></div>
+      <div class="stat-card s-roll"><div class="stat-label">ROLLBACK</div><div class="stat-value" id="st-roll">0</div></div>
+      <div class="stat-card s-pend"><div class="stat-label">PENDING</div><div class="stat-value" id="st-pend">0</div></div>
+      <div class="stat-card s-reat"><div class="stat-label">REATTEMPTED</div><div class="stat-value" id="st-reat">0</div></div>
+    </div>
+
+    <!-- ENV TABS: CUG / PROD / UAT -->
+    <div class="env-nav">
+      <button class="env-btn ac" id="env-cug" onclick="switchEnv('CUG')">📱 CUG</button>
+      <button class="env-btn" id="env-prod" onclick="switchEnv('PROD')">🏭 PROD</button>
+      <button class="env-btn" id="env-uat" onclick="switchEnv('UAT')">🧪 UAT</button>
+    </div>
+
+    <!-- QUARTER PANEL -->
+    <div class="q-panel">
+      <div class="q-row">
+        <button class="q-btn active" data-q="ALL" onclick="switchQ(this,'ALL')">All Quarters</button>
+        <button class="q-btn" data-q="Q1" onclick="switchQ(this,'Q1')">Q1 <small>Apr–Jun</small></button>
+        <button class="q-btn" data-q="Q2" onclick="switchQ(this,'Q2')">Q2 <small>Jul–Sep</small></button>
+        <button class="q-btn" data-q="Q3" onclick="switchQ(this,'Q3')">Q3 <small>Oct–Dec</small></button>
+        <button class="q-btn" data-q="Q4" onclick="switchQ(this,'Q4')">Q4 <small>Jan–Mar</small></button>
+        <span class="fy-label" id="fy-label">FY 2025–26</span>
+      </div>
+      <div class="toolbar">
+        <input class="search-box" type="text" placeholder="🔍  Search Application, CR No, Purpose, Remarks..." oninput="doSearch(this.value)"/>
+        <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn-add" onclick="openModal()">+ Add Deployment</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-outer">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:center">SR NO.</th>
+              <th>CR NO</th>
+              <th>APPLICATION</th>
+              <th>PURPOSE OF DEPLOYMENT</th>
+              <th>APPROVAL DATE (BANK)</th>
+              <th>DEPLOYMENT DATE</th>
+              <th>STATUS</th>
+              <th>REATTEMPTED DATE</th>
+              <th>IMPACT IN PROD</th>
+              <th>REASON FAILURE / SUCCESS</th>
+              <th>UAT DATE</th>
+              <th>PASS LOG</th>
+              <th>PROD FIX / CF</th>
+              <th>APK VERSION</th>
+              <th>REMARKS</th>
+              <th>ADDED BY</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state" style="display:none">
+        <span class="ei">📭</span>
+        No deployment entries found.<br/>Add a new one using the button above.
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════ MODAL ══════════════ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h2 id="modal-title">Add Deployment</h2>
+        <span class="env-tag" id="modal-env-tag">CUG</span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="vendor-notice" id="vendor-notice">
+      ℹ️ <strong>Vendor Access:</strong> You can add new entries. Only Admins can edit or delete records.
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>CR NO *</label>
+        <input type="text" id="f-cr" placeholder="CR-2025-001"/>
+      </div>
+      <div class="field">
+        <label>APPLICATION *</label>
+        <input type="text" id="f-app" placeholder="Mobile Banking App"/>
+      </div>
+      <div class="field">
+        <label>APK / BUILD VERSION</label>
+        <input type="text" id="f-apk" placeholder="v3.2.0"/>
+      </div>
+      <div class="field c3">
+        <label>PURPOSE OF DEPLOYMENT *</label>
+        <input type="text" id="f-purpose" placeholder="Describe the purpose of this deployment..."/>
+      </div>
+      <div class="field">
+        <label>DATE OF APPROVAL BY BANK</label>
+        <input type="date" id="f-approval"/>
+      </div>
+      <div class="field">
+        <label>DEPLOYMENT DATE</label>
+        <input type="date" id="f-deploy"/>
+      </div>
+      <div class="field">
+        <label>STATUS</label>
+        <select id="f-status" style="width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;">
+          <option value="Pending">Pending</option>
+          <option value="Deployed">Deployed</option>
+          <option value="Rollback">Rollback</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>REATTEMPTED DATE</label>
+        <input type="date" id="f-reattempt"/>
+      </div>
+      <div class="field">
+        <label>UAT DATE OF PRODUCT</label>
+        <input type="date" id="f-uat"/>
+      </div>
+      <div class="field">
+        <label>PASS LOG RECEIVED</label>
+        <select id="f-passlog" style="width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;">
+          <option value="N/A">N/A</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+      <div class="field c2">
+        <label>IMPACT IN PROD</label>
+        <input type="text" id="f-impact" placeholder="e.g. None / Minor 2hr downtime"/>
+      </div>
+      <div class="field c3">
+        <label>REASON OF FAILURE / SUCCESS</label>
+        <input type="text" id="f-reason" placeholder="Root cause or success note..."/>
+      </div>
+      <div class="field">
+        <label>PROD FIX / CF</label>
+        <input type="text" id="f-profix" placeholder="Hotfix CF-123"/>
+      </div>
+      <div class="field c2">
+        <label>REMARKS</label>
+        <input type="text" id="f-remarks" placeholder="Any additional notes..."/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEntry()">Save Deployment</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
